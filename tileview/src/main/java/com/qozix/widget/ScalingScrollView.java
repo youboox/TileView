@@ -103,13 +103,15 @@ public class ScalingScrollView extends ScrollView implements
   // scale limits
 
   private void calculateMinimumScaleToFit() {
-    float minimumScaleX = getWidth() / (float) getContentWidth();
-    float minimumScaleY = getHeight() / (float) getContentHeight();
-    float recalculatedMinScale = computeMinimumScaleForMode(minimumScaleX, minimumScaleY);
-    if (recalculatedMinScale != mEffectiveMinScale) {
-      mEffectiveMinScale = recalculatedMinScale;
-      if (mScale < mEffectiveMinScale) {
-        setScale(mEffectiveMinScale);
+    if (hasContent()) {
+      float minimumScaleX = getWidth() / (float) super.getContentWidth();
+      float minimumScaleY = getHeight() / (float) super.getContentHeight();
+      float recalculatedMinScale = computeMinimumScaleForMode(minimumScaleX, minimumScaleY);
+      if (recalculatedMinScale != mEffectiveMinScale) {
+        mEffectiveMinScale = recalculatedMinScale;
+        if (mScale < mEffectiveMinScale) {
+          setScale(mEffectiveMinScale);
+        }
       }
     }
   }
@@ -228,7 +230,12 @@ public class ScalingScrollView extends ScrollView implements
   @Override
   public boolean onDoubleTap(MotionEvent event) {
     float destination = (float) (Math.pow(2, Math.floor(Math.log(mScale * 2) / Math.log(2))));
-    float effectiveDestination = mShouldLoopScale && mScale >= mMaxScale ? mMinScale : destination;
+    float effectiveDestination;
+    if (mShouldLoopScale) {
+      effectiveDestination = mScale >= mMaxScale ? mEffectiveMinScale : destination;
+    } else {
+      effectiveDestination = mScale >= (mEffectiveMinScale * 1.2f) ? mEffectiveMinScale : destination;
+    }
     destination = getConstrainedDestinationScale(effectiveDestination);
     smoothScaleFromFocalPoint((int) event.getX(), (int) event.getY(), destination);
     return true;

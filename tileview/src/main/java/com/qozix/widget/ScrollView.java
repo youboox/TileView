@@ -3,8 +3,10 @@ package com.qozix.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.support.v4.view.ViewCompat;
 import android.util.AttributeSet;
 import android.view.FocusFinder;
 import android.view.InputDevice;
@@ -740,7 +742,13 @@ public class ScrollView extends FrameLayout {
       scrollToChild(mChildToScrollTo);
     }
     mChildToScrollTo = null;
-    if (!isLaidOut()) {
+    boolean isViewLaidOut;
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      isViewLaidOut = isLaidOut();
+    } else {
+      isViewLaidOut = ViewCompat.isLaidOut(this);
+    }
+    if (!isViewLaidOut) {
       if (mSavedState != null) {
         setScrollX(mSavedState.scrollPositionX);
         setScrollY(mSavedState.scrollPositionY);

@@ -96,6 +96,14 @@ public class ScalingScrollView extends ScrollView implements
     }
   }
 
+  public float getMinScale() {
+    return mEffectiveMinScale;
+  }
+
+  public float getMaxScale() {
+    return mMaxScale;
+  }
+
   public ZoomScrollAnimator getAnimator() {
     return mZoomScrollAnimator;
   }

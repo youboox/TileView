@@ -31,6 +31,7 @@ public class ScalingScrollView extends ScrollView implements
   private float mMinScale = 0f;
   private float mMaxScale = 1f;
   private float mEffectiveMinScale = 0f;
+  private float mZoomFactor = 2f;
 
   private boolean mWillHandleContentSize;
   private boolean mShouldVisuallyScaleContents;
@@ -140,6 +141,10 @@ public class ScalingScrollView extends ScrollView implements
     setScale(mScale);
   }
 
+  public void setZoomFactor(float zoomFactor) {
+    mZoomFactor = zoomFactor;
+  }
+
   public void setMinimumScaleMode(MinimumScaleMode minimumScaleMode) {
     mMinimumScaleMode = minimumScaleMode;
     calculateMinimumScaleToFit();
@@ -237,11 +242,13 @@ public class ScalingScrollView extends ScrollView implements
 
   @Override
   public boolean onDoubleTap(MotionEvent event) {
-    float destination = (float) (Math.pow(2, Math.floor(Math.log(mScale * 2) / Math.log(2))));
+    float destination;
     float effectiveDestination;
     if (mShouldLoopScale) {
+      destination = (float) (Math.pow(2, Math.floor(Math.log(mScale * 2) / Math.log(2))));
       effectiveDestination = mScale >= mMaxScale ? mEffectiveMinScale : destination;
     } else {
+      destination = mScale * mZoomFactor;
       effectiveDestination = mScale >= (mEffectiveMinScale * 1.2f) ? mEffectiveMinScale : destination;
     }
     destination = getConstrainedDestinationScale(effectiveDestination);

@@ -118,7 +118,7 @@ public class ScalingScrollView extends ScrollView implements
       float recalculatedMinScale = computeMinimumScaleForMode(minimumScaleX, minimumScaleY);
       if (recalculatedMinScale != mEffectiveMinScale) {
         mEffectiveMinScale = recalculatedMinScale;
-        if (mScale < mEffectiveMinScale) {
+        if (mScale != mEffectiveMinScale) {
           setScale(mEffectiveMinScale);
         }
       }

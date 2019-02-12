@@ -18,7 +18,8 @@ public class ScalingScrollView extends ScrollView implements
   GestureDetector.OnDoubleTapListener,
   ScaleGestureDetector.OnScaleGestureListener {
 
-  public enum MinimumScaleMode {CONTAIN, COVER, NONE}
+  public enum MinimumScaleMode {CONTAIN, COVER, FILL_WIDTH, FILL_HEIGHT, NONE}
+  public enum AlignmentMode {TOP, LEFT, BOTTOM, RIGHT, CENTER, NONE}
 
   private ScaleGestureDetector mScaleGestureDetector;
   private ScaleChangedListener mScaleChangedListener;
@@ -26,6 +27,7 @@ public class ScalingScrollView extends ScrollView implements
   private ZoomScrollAnimator mZoomScrollAnimator;
 
   private MinimumScaleMode mMinimumScaleMode = MinimumScaleMode.COVER;
+  private AlignmentMode mAlignmentMode = AlignmentMode.NONE;
 
   private float mScale = 1f;
   private float mMinScale = 0f;
@@ -83,6 +85,7 @@ public class ScalingScrollView extends ScrollView implements
     if (mScale != scale) {
       float previous = mScale;
       mScale = scale;
+      positionChildForMode();
       resetScrollPositionToWithinLimits();
       if (mShouldVisuallyScaleContents && hasContent()) {
         getChild().setPivotX(0);
@@ -131,6 +134,10 @@ public class ScalingScrollView extends ScrollView implements
         return Math.max(minimumScaleX, minimumScaleY);
       case CONTAIN:
         return Math.min(minimumScaleX, minimumScaleY);
+      case FILL_WIDTH:
+        return minimumScaleX;
+      case FILL_HEIGHT:
+        return minimumScaleY;
     }
     return mMinScale;
   }
@@ -150,6 +157,13 @@ public class ScalingScrollView extends ScrollView implements
     calculateMinimumScaleToFit();
   }
 
+  public void setAlignmentMode(AlignmentMode alignmentMode) {
+    mAlignmentMode = alignmentMode;
+    if (hasContent()) {
+      setScale(mEffectiveMinScale);
+    }
+  }
+
   @Override
   public int getContentWidth() {
     if (mWillHandleContentSize) {
@@ -164,6 +178,34 @@ public class ScalingScrollView extends ScrollView implements
       return super.getContentHeight();
     }
     return (int) (super.getContentHeight() * mScale);
+  }
+
+  private void positionChildForMode() {
+    int deltaHeight = getHeight() - getContentHeight();
+    int deltaWidth = getWidth() - getContentWidth();
+
+    int left = 0, top = 0, right = 0, bottom = 0;
+
+    switch(mAlignmentMode) {
+      case LEFT:
+        right = Math.max(0, deltaWidth);
+        top = Math.max(0, deltaHeight / 2);
+        break;
+      case RIGHT:
+        left = Math.max(0, deltaWidth);
+        top = Math.max(0, deltaHeight / 2);
+        break;
+      case BOTTOM:
+        top = Math.max(0, deltaHeight);
+        break;
+      case CENTER:
+        top = Math.max(0, deltaHeight / 2);
+        break;
+      case TOP:
+      case NONE:
+        break;
+    }
+    setPadding(left, top, right, bottom);
   }
 
   private void resetScrollPositionToWithinLimits() {
